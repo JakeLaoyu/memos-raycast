@@ -3,7 +3,7 @@
   "name": "memos-raycast",
   "title": "memos-raycast",
   "description": "Manage Your Memos",
-  "icon": "command-icon.png",
+  "icon": "logo.png",
   "author": "JakeYu",
   "license": "MIT",
   "commands": [
