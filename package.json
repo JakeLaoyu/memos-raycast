@@ -12,6 +12,7 @@
       "title": "Send MEMO",
       "description": "Send your thoughts to Memos",
       "mode": "view",
+      "subtitle": "Send your thoughts to Memos",
       "arguments": [
         {
           "name": "text",
@@ -22,10 +23,19 @@
       ]
     },
     {
-      "name": "openMemos",
-      "title": "Open Memos",
+      "name": "openMemoWebsite",
+      "title": "Open Memo Website",
       "description": "Open Memos Website",
       "mode": "no-view",
+      "subtitle": "Open Memos Website",
+      "icon": "logo.png"
+    },
+    {
+      "name": "sendMemoForm",
+      "title": "Send Memo Form",
+      "description": "Edit memo Detail",
+      "mode": "view",
+      "subtitle": "Edit memo Detail",
       "icon": "logo.png"
     }
   ],

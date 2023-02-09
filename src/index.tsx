@@ -1,8 +1,18 @@
-import { Detail, ActionPanel, Action, getPreferenceValues, LaunchProps, Toast, showToast, open } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import {
+  Detail,
+  ActionPanel,
+  Action,
+  getPreferenceValues,
+  LaunchProps,
+  Toast,
+  showToast,
+  open,
+  popToRoot,
+} from "@raycast/api";
 import parse from "url-parse";
 import { Preferences } from "./types/global";
 import { PostResponse } from "./types/request";
+import { getMe, sendMemo } from "./utils/api";
 
 interface TodoArguments {
   text: string;
@@ -11,16 +21,12 @@ interface TodoArguments {
 export default function Command(props: LaunchProps<{ arguments: TodoArguments }>) {
   const preferences = getPreferenceValues<Preferences>();
   const { openApi } = preferences;
-  const { text } = props.arguments;
+  const { text = "" } = props.arguments;
 
-  const { isLoading, data } = useFetch<PostResponse>(openApi, {
-    method: "Post",
-    body: JSON.stringify({
-      content: text,
-    }),
-    headers: {
-      "Content-Type": "application/json",
-    },
+  getMe();
+
+  const { isLoading, data } = sendMemo({
+    content: text,
   });
 
   function openWeb(data: PostResponse) {
@@ -28,6 +34,10 @@ export default function Command(props: LaunchProps<{ arguments: TodoArguments }>
     const url = `${protocol}//${host}/m/${data.data.id}`;
     open(url);
   }
+
+  setTimeout(() => {
+    popToRoot({ clearSearchBar: true });
+  }, 3000);
 
   return (
     <Detail

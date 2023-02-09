@@ -24,3 +24,33 @@ export interface PostResponse {
     resourceList: [];
   };
 }
+
+export interface TagResponse {
+  data: string[];
+}
+
+export enum ROLE {
+  HOST = "HOST",
+  USER = "USER",
+}
+
+export interface MeResponse {
+  data: {
+    id: number;
+    rowStatus: "NORMAL";
+    createdTs: number;
+    updatedTs: number;
+    username: string;
+    role: ROLE;
+    email: string;
+    nickname: string;
+    openId: string;
+    userSettingList: [
+      {
+        UserID: number;
+        key: string;
+        value: string;
+      }
+    ];
+  };
+}
