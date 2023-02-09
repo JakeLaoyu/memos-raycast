@@ -11,15 +11,33 @@
       "name": "index",
       "title": "Send MEMO",
       "description": "Send your thoughts to Memos",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Text",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "openMemos",
+      "title": "Open Memos",
+      "description": "Open Memos Website",
+      "mode": "no-view",
+      "icon": "logo.png"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.3"
+    "@raycast/api": "^1.47.3",
+    "@raycast/utils": "^1.4.16",
+    "url-parse": "^1.5.10"
   },
   "devDependencies": {
     "@types/node": "18.8.3",
     "@types/react": "18.0.9",
+    "@types/url-parse": "^1.4.8",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
@@ -33,5 +51,14 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "preferences": [
+    {
+      "name": "openApi",
+      "description": "OpenApi Url",
+      "type": "textfield",
+      "required": true,
+      "title": "Open Api"
+    }
+  ]
 }
