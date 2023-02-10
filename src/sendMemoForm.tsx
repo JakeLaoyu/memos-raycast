@@ -1,4 +1,4 @@
-import { Form, Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { Form, Detail, ActionPanel, Action, showToast, Toast, open } from "@raycast/api";
 import { useState } from "react";
 import { MemoInfoResponse, PostFileResponse, PostMemoParams } from "./types/request";
 
@@ -18,11 +18,19 @@ export default function SendMemoFormCommand(): JSX.Element {
   const [nameError, setNameError] = useState<string | undefined>();
   const [files, setFiles] = useState<string[]>([]);
   const [createdMarkdown, setCreatedMarkdown] = useState<string>();
+  const [createdUrl, setCreatedUrl] = useState<string>();
 
   function dropNameErrorIfNeeded() {
     if (nameError && nameError.length > 0) {
       setNameError(undefined);
     }
+  }
+
+  function computedCreatedUrl(data: MemoInfoResponse["data"]) {
+    const { id } = data;
+    const url = getRequestUrl(`/m/${id}`);
+
+    setCreatedUrl(url);
   }
 
   function computedCreatedMarkdown(data: MemoInfoResponse["data"]) {
@@ -85,13 +93,23 @@ export default function SendMemoFormCommand(): JSX.Element {
     });
 
     if (res) {
-      computedCreatedMarkdown(res.data);
       showToast(Toast.Style.Success, "Send Memo Success");
+      computedCreatedMarkdown(res.data);
+      computedCreatedUrl(res.data);
     }
   };
 
   return createdMarkdown ? (
-    <Detail markdown={createdMarkdown} />
+    <Detail
+      markdown={createdMarkdown}
+      actions={
+        createdUrl && (
+          <ActionPanel>
+            <Action title="Open web" onAction={() => open(createdUrl)} />
+          </ActionPanel>
+        )
+      }
+    />
   ) : (
     <Form
       isLoading={isLoading}

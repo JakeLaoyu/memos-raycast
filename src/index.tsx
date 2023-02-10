@@ -15,6 +15,8 @@ export default async function Command(props: LaunchProps<{ arguments: TodoArgume
 
   const response = await sendMemo({
     content: text,
+    visibility: "PRIVATE",
+    resourceIdList: [],
   });
 
   if (response?.data?.id) {
