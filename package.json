@@ -1,18 +1,18 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "memos-raycast",
-  "title": "memos-raycast",
+  "name": "send-to-memos",
+  "title": "Send To Memos",
   "description": "Manage Your Memos",
   "icon": "logo.png",
   "author": "JakeYu",
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "sendMemo",
       "title": "Send MEMO",
       "description": "Send your thoughts to Memos",
       "mode": "no-view",
-      "subtitle": "Send your thoughts to Memos",
+      "subtitle": "Memos",
       "arguments": [
         {
           "name": "text",
@@ -27,7 +27,7 @@
       "title": "Open Memo Website",
       "description": "Open Memos Website",
       "mode": "no-view",
-      "subtitle": "Open Memos Website",
+      "subtitle": "Memos",
       "icon": "logo.png"
     },
     {
@@ -35,7 +35,7 @@
       "title": "Send Memo Form",
       "description": "Edit memo Detail",
       "mode": "view",
-      "subtitle": "Edit memo Detail",
+      "subtitle": "Memos",
       "icon": "logo.png"
     }
   ],
