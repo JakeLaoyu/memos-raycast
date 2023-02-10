@@ -1,3 +1,28 @@
+import { VISIBILITY } from "../utils/constant";
+
+export enum ROLE {
+  HOST = "HOST",
+  USER = "USER",
+}
+
+export interface PostMemoParams {
+  content: string;
+  visibility: keyof typeof VISIBILITY;
+  resourceIdList: number[];
+}
+
+interface ResourceObj {
+  id: number;
+  creatorId: number;
+  createdTs: number;
+  updatedTs: number;
+  filename: string;
+  externalLink: string;
+  type: string;
+  size: number;
+  linkedMemoAmount: number;
+}
+
 export interface PostResponse {
   data: {
     id: number;
@@ -21,17 +46,12 @@ export interface PostResponse {
       openId: string;
       userSettingList: null;
     };
-    resourceList: [];
+    resourceList: ResourceObj[];
   };
 }
 
 export interface TagResponse {
   data: string[];
-}
-
-export enum ROLE {
-  HOST = "HOST",
-  USER = "USER",
 }
 
 export interface MeResponse {
@@ -52,5 +72,19 @@ export interface MeResponse {
         value: string;
       }
     ];
+  };
+}
+
+export interface PostFileResponse {
+  data: {
+    id: number;
+    creatorId: number;
+    createdTs: number;
+    updatedTs: number;
+    filename: string;
+    externalLink: string;
+    type: string;
+    size: number;
+    linkedMemoAmount: number;
   };
 }

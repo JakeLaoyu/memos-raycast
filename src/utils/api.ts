@@ -1,15 +1,19 @@
 import { getPreferenceValues, Cache } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import fetch from "cross-fetch";
 import parse from "url-parse";
+import FormData from "form-data";
+import fs from "fs";
+import path from "path";
+import mime from "mime";
+import axios, { AxiosRequestConfig } from "axios";
 import { Preferences } from "../types/global";
-import { MeResponse, PostResponse, TagResponse } from "../types/request";
+import { MeResponse, PostFileResponse, PostMemoParams, PostResponse, TagResponse } from "../types/request";
 
 const cache = new Cache();
 
 const parseResponse = async (response: Response) => {
   const cookie = response.headers.get("Set-Cookie");
-  console.log("set cookie", cookie);
+
   if (cookie) {
     cache.set("cookie", cookie);
   }
@@ -48,22 +52,56 @@ const getUseFetch = <T>(url: string, options: Record<string, any>) => {
   });
 };
 
+const getFetch = <T>(options: AxiosRequestConfig) => {
+  return axios<T>({
+    headers: {
+      "Content-Type": "application/json; charset=UTF-8",
+      cookie: cache.get("cookie") || "",
+    },
+    ...options,
+  }).then((res) => {
+    if (res?.headers?.["set-cookie"]?.length) {
+      const cookie = res.headers["set-cookie"].reduce((acc, cur) => {
+        return acc + cur;
+      }, "");
+      cache.set("cookie", cookie);
+    }
+
+    return res.data;
+  });
+};
+
 export const getMe = () => {
   return getUseFetch<MeResponse>(getRequestUrl(`/api/user/me?openId=${getOpenId()}`), {});
 };
 
-export const sendMemo = (data: Record<string, any> = {}) => {
-  return fetch(getOpenApi(), {
+export const sendMemo = (data: PostMemoParams) => {
+  return getFetch<PostResponse>({
+    url: getOpenApi(),
     method: "POST",
-    body: JSON.stringify(data),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  }).then(parseResponse);
+    data,
+  });
 };
 
 export const getTags = () => {
   const url = getRequestUrl(`/api/tag?openId=${getOpenId()}`);
 
   return getUseFetch<TagResponse>(url, {});
+};
+
+export const postFile = (filePath: string) => {
+  const readFile = fs.readFileSync(filePath);
+
+  const formData = new FormData();
+  formData.append("file", readFile, {
+    filename: path.basename(filePath),
+    contentType: mime.getType(filePath) || undefined,
+  });
+
+  return getFetch<PostFileResponse>({
+    url: getRequestUrl(`/api/resource/blob?openId=${getOpenId()}`),
+    method: "POST",
+    data: formData,
+    headers: {},
+  });
 };

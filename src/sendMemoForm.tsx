@@ -1,8 +1,16 @@
-import { Form } from "@raycast/api";
+import { Form, Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
+import { PostFileResponse, PostMemoParams } from "./types/request";
 
-import { getTags } from "./utils/api";
+import { getTags, postFile, sendMemo } from "./utils/api";
 import { VISIBILITY } from "./utils/constant";
+
+interface FormData {
+  content: string;
+  files: string[];
+  tags: string[];
+  visibility: keyof typeof VISIBILITY;
+}
 
 export default function SendMemoFormCommand(): JSX.Element {
   const { isLoading, data: existTags } = getTags();
@@ -17,8 +25,69 @@ export default function SendMemoFormCommand(): JSX.Element {
     }
   }
 
+  const onSubmit = async (values: FormData) => {
+    console.log("onSubmit", values);
+    const { content, files, tags, visibility } = values;
+
+    const params = {
+      content,
+      visibility,
+    } as PostMemoParams;
+
+    if (tags?.length) {
+      params.content += ` #${tags.join(" #")}`;
+    }
+
+    if (files.length) {
+      showToast({
+        style: Toast.Style.Animated,
+        title: "Upload Files",
+      });
+
+      const postFilesPromiseArr: Promise<PostFileResponse>[] = [];
+
+      files.forEach((file) => {
+        postFilesPromiseArr.push(postFile(file));
+      });
+
+      const uploadedFiles = await Promise.all(postFilesPromiseArr).catch(() => {
+        showToast(Toast.Style.Failure, "Upload Files Failed");
+      });
+
+      console.log("uploadedFiles", uploadedFiles);
+
+      if (uploadedFiles) {
+        params.resourceIdList = uploadedFiles.map((file) => file.data.id);
+      }
+    }
+
+    showToast({
+      style: Toast.Style.Animated,
+      title: "Sending Memo",
+    });
+
+    console.log("params", params);
+
+    const res = await sendMemo(params).catch(() => {
+      showToast(Toast.Style.Failure, "Send Memo Failed");
+    });
+
+    console.log("res", res);
+
+    if (res) {
+      showToast(Toast.Style.Success, "Send Memo Success");
+    }
+  };
+
   return (
-    <Form isLoading={isLoading}>
+    <Form
+      isLoading={isLoading}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm onSubmit={onSubmit} />
+        </ActionPanel>
+      }
+    >
       <Form.TextArea
         id="content"
         title="Content"
@@ -41,8 +110,6 @@ export default function SendMemoFormCommand(): JSX.Element {
           return <Form.TagPicker.Item key={tag} value={tag} title={tag} />;
         })}
       </Form.TagPicker>
-
-      <Form.TextField id="tag" title="New Tag" />
 
       <Form.Dropdown id="visibility" title="Limit" defaultValue="PRIVATE">
         {Object.keys(VISIBILITY).map((key) => {
