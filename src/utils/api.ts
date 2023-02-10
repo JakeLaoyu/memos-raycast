@@ -28,8 +28,13 @@ const getOpenApi = () => {
   return openApi;
 };
 
-export const getRequestUrl = (path = "") => {
+export const getOriginUrl = () => {
   const { origin } = parse(getOpenApi());
+  return origin;
+};
+
+export const getRequestUrl = (path = "") => {
+  const origin = getOriginUrl();
   const url = `${origin}${path}`;
   return url;
 };

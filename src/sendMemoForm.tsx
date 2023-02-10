@@ -1,8 +1,7 @@
-import { Form, Detail, ActionPanel, Action, showToast, Toast, open } from "@raycast/api";
+import { Form, Detail, ActionPanel, Action, showToast, Toast, open, popToRoot } from "@raycast/api";
 import { useState } from "react";
 import { MemoInfoResponse, PostFileResponse, PostMemoParams } from "./types/request";
-
-import { getRequestUrl, getTags, postFile, sendMemo } from "./utils/api";
+import { getOriginUrl, getRequestUrl, getTags, postFile, sendMemo } from "./utils/api";
 import { VISIBILITY } from "./utils/constant";
 
 interface FormData {
@@ -96,8 +95,17 @@ export default function SendMemoFormCommand(): JSX.Element {
       showToast(Toast.Style.Success, "Send Memo Success");
       computedCreatedMarkdown(res.data);
       computedCreatedUrl(res.data);
+
+      setTimeout(() => {
+        popToRoot({ clearSearchBar: true });
+      }, 5000);
     }
   };
+
+  function openWeb() {
+    open(createdUrl || getOriginUrl());
+    popToRoot({ clearSearchBar: true });
+  }
 
   return createdMarkdown ? (
     <Detail
@@ -105,7 +113,7 @@ export default function SendMemoFormCommand(): JSX.Element {
       actions={
         createdUrl && (
           <ActionPanel>
-            <Action title="Open web" onAction={() => open(createdUrl)} />
+            <Action title="Open web" onAction={openWeb} />
           </ActionPanel>
         )
       }
