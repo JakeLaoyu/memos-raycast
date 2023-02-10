@@ -13,15 +13,6 @@ export default function Command(props: LaunchProps<{ arguments: TodoArguments }>
   const { openApi } = preferences;
   const { text } = props.arguments;
 
-  if (!text) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Please enter text",
-    });
-
-    return <Detail markdown="Please enter text" />;
-  }
-
   const { isLoading, data } = useFetch<PostResponse>(openApi, {
     method: "Post",
     body: JSON.stringify({
