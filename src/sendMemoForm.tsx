@@ -1,8 +1,8 @@
 import { Form, Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
-import { PostFileResponse, PostMemoParams } from "./types/request";
+import { MemoInfoResponse, PostFileResponse, PostMemoParams } from "./types/request";
 
-import { getTags, postFile, sendMemo } from "./utils/api";
+import { getRequestUrl, getTags, postFile, sendMemo } from "./utils/api";
 import { VISIBILITY } from "./utils/constant";
 
 interface FormData {
@@ -18,6 +18,7 @@ export default function SendMemoFormCommand(): JSX.Element {
   const [nameError, setNameError] = useState<string | undefined>();
   const [files, setFiles] = useState<string[]>([]);
   const [tags, setTags] = useState<string[]>();
+  const [createdMarkdown, setCreatedMarkdown] = useState<string>();
 
   function dropNameErrorIfNeeded() {
     if (nameError && nameError.length > 0) {
@@ -25,8 +26,19 @@ export default function SendMemoFormCommand(): JSX.Element {
     }
   }
 
+  function computedCreatedMarkdown(data: MemoInfoResponse["data"]) {
+    const { content, resourceList } = data;
+    let markdown = content;
+
+    resourceList.forEach((resource) => {
+      const resourceUrl = getRequestUrl(`/o/r/${resource.id}/${resource.filename}`);
+      markdown += `\n\n![${resource.filename}](${resourceUrl})`;
+    });
+
+    setCreatedMarkdown(markdown);
+  }
+
   const onSubmit = async (values: FormData) => {
-    console.log("onSubmit", values);
     const { content, files, tags, visibility } = values;
 
     const params = {
@@ -54,8 +66,6 @@ export default function SendMemoFormCommand(): JSX.Element {
         showToast(Toast.Style.Failure, "Upload Files Failed");
       });
 
-      console.log("uploadedFiles", uploadedFiles);
-
       if (uploadedFiles) {
         params.resourceIdList = uploadedFiles.map((file) => file.data.id);
       }
@@ -66,20 +76,19 @@ export default function SendMemoFormCommand(): JSX.Element {
       title: "Sending Memo",
     });
 
-    console.log("params", params);
-
     const res = await sendMemo(params).catch(() => {
       showToast(Toast.Style.Failure, "Send Memo Failed");
     });
 
-    console.log("res", res);
-
     if (res) {
+      computedCreatedMarkdown(res.data);
       showToast(Toast.Style.Success, "Send Memo Success");
     }
   };
 
-  return (
+  return createdMarkdown ? (
+    <Detail markdown={createdMarkdown} />
+  ) : (
     <Form
       isLoading={isLoading}
       actions={

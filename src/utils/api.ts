@@ -7,7 +7,7 @@ import path from "path";
 import mime from "mime";
 import axios, { AxiosRequestConfig } from "axios";
 import { Preferences } from "../types/global";
-import { MeResponse, PostFileResponse, PostMemoParams, PostResponse, TagResponse } from "../types/request";
+import { MeResponse, PostFileResponse, PostMemoParams, MemoInfoResponse, TagResponse } from "../types/request";
 
 const cache = new Cache();
 
@@ -28,7 +28,7 @@ const getOpenApi = () => {
   return openApi;
 };
 
-const getRequestUrl = (path = "") => {
+export const getRequestUrl = (path = "") => {
   const { origin } = parse(getOpenApi());
   const url = `${origin}${path}`;
   return url;
@@ -76,7 +76,7 @@ export const getMe = () => {
 };
 
 export const sendMemo = (data: PostMemoParams) => {
-  return getFetch<PostResponse>({
+  return getFetch<MemoInfoResponse>({
     url: getOpenApi(),
     method: "POST",
     data,

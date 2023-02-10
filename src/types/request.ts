@@ -23,7 +23,7 @@ interface ResourceObj {
   linkedMemoAmount: number;
 }
 
-export interface PostResponse {
+export interface MemoInfoResponse {
   data: {
     id: number;
     rowStatus: string;
