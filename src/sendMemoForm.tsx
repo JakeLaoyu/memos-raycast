@@ -17,7 +17,6 @@ export default function SendMemoFormCommand(): JSX.Element {
 
   const [nameError, setNameError] = useState<string | undefined>();
   const [files, setFiles] = useState<string[]>([]);
-  const [tags, setTags] = useState<string[]>();
   const [createdMarkdown, setCreatedMarkdown] = useState<string>();
 
   function dropNameErrorIfNeeded() {
@@ -30,9 +29,14 @@ export default function SendMemoFormCommand(): JSX.Element {
     const { content, resourceList } = data;
     let markdown = content;
 
-    resourceList.forEach((resource) => {
+    resourceList.forEach((resource, index) => {
       const resourceUrl = getRequestUrl(`/o/r/${resource.id}/${resource.filename}`);
-      markdown += `\n\n![${resource.filename}](${resourceUrl})`;
+
+      if (index === 0) {
+        markdown += "\n\n";
+      }
+
+      markdown += ` ![${resource.filename}](${resourceUrl})`;
     });
 
     setCreatedMarkdown(markdown);
@@ -114,7 +118,7 @@ export default function SendMemoFormCommand(): JSX.Element {
 
       <Form.FilePicker id="files" value={files} onChange={setFiles} />
 
-      <Form.TagPicker id="tags" title="Exist Tags" value={tags} onChange={setTags}>
+      <Form.TagPicker id="tags" title="Exist Tags">
         {existTags?.data?.map((tag) => {
           return <Form.TagPicker.Item key={tag} value={tag} title={tag} />;
         })}
