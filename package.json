@@ -11,7 +11,7 @@
       "name": "index",
       "title": "Send MEMO",
       "description": "Send your thoughts to Memos",
-      "mode": "view",
+      "mode": "no-view",
       "subtitle": "Send your thoughts to Memos",
       "arguments": [
         {

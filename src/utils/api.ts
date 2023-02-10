@@ -1,10 +1,21 @@
 import { getPreferenceValues, Cache } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
+import fetch from "cross-fetch";
 import parse from "url-parse";
 import { Preferences } from "../types/global";
 import { MeResponse, PostResponse, TagResponse } from "../types/request";
 
 const cache = new Cache();
+
+const parseResponse = async (response: Response) => {
+  const cookie = response.headers.get("Set-Cookie");
+  console.log("set cookie", cookie);
+  if (cookie) {
+    cache.set("cookie", cookie);
+  }
+  const data = await response.json();
+  return data;
+};
 
 const getOpenApi = () => {
   const preferences = getPreferenceValues<Preferences>();
@@ -32,15 +43,7 @@ const getUseFetch = <T>(url: string, options: Record<string, any>) => {
       "Content-Type": "application/json",
       cookie: cache.get("cookie") || "",
     },
-    parseResponse: async (response: Response) => {
-      const cookie = response.headers.get("Set-Cookie");
-      console.log("set cookie", cookie);
-      if (cookie) {
-        cache.set("cookie", cookie);
-      }
-      const data = await response.json();
-      return data;
-    },
+    parseResponse,
     ...options,
   });
 };
@@ -50,10 +53,13 @@ export const getMe = () => {
 };
 
 export const sendMemo = (data: Record<string, any> = {}) => {
-  return getUseFetch<PostResponse>(getOpenApi(), {
+  return fetch(getOpenApi(), {
     method: "POST",
     body: JSON.stringify(data),
-  });
+    headers: {
+      "Content-Type": "application/json",
+    },
+  }).then(parseResponse);
 };
 
 export const getTags = () => {

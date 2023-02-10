@@ -1,55 +1,31 @@
-import {
-  Detail,
-  ActionPanel,
-  Action,
-  getPreferenceValues,
-  LaunchProps,
-  Toast,
-  showToast,
-  open,
-  popToRoot,
-} from "@raycast/api";
-import parse from "url-parse";
-import { Preferences } from "./types/global";
-import { PostResponse } from "./types/request";
-import { getMe, sendMemo } from "./utils/api";
+import { LaunchProps, Toast, showToast } from "@raycast/api";
+import { sendMemo } from "./utils/api";
 
 interface TodoArguments {
   text: string;
 }
 
-export default function Command(props: LaunchProps<{ arguments: TodoArguments }>) {
-  const preferences = getPreferenceValues<Preferences>();
-  const { openApi } = preferences;
+export default async function Command(props: LaunchProps<{ arguments: TodoArguments }>) {
   const { text = "" } = props.arguments;
 
-  getMe();
+  showToast({
+    style: Toast.Style.Animated,
+    title: "Sending",
+  });
 
-  const { isLoading, data } = sendMemo({
+  const response = await sendMemo({
     content: text,
   });
 
-  function openWeb(data: PostResponse) {
-    const { protocol, host } = parse(openApi);
-    const url = `${protocol}//${host}/m/${data.data.id}`;
-    open(url);
+  if (response?.data?.id) {
+    showToast({
+      style: Toast.Style.Success,
+      title: "Sent",
+    });
+  } else {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Failed",
+    });
   }
-
-  setTimeout(() => {
-    popToRoot({ clearSearchBar: true });
-  }, 3000);
-
-  return (
-    <Detail
-      isLoading={isLoading}
-      markdown={data?.data?.id ? "# Success" : "# Error"}
-      actions={
-        data && (
-          <ActionPanel>
-            <Action title="Open web" onAction={() => openWeb(data)} />
-          </ActionPanel>
-        )
-      }
-    />
-  );
 }
