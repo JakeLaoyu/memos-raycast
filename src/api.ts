@@ -1,6 +1,7 @@
 import { getPreferenceValues, Cache } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import parse from "url-parse";
+import qs from "qs";
 import FormData from "form-data";
 import fs from "fs";
 import path from "path";
@@ -113,7 +114,26 @@ export const postFile = (filePath: string) => {
 };
 
 export const getAllMemos = () => {
-  const url = getRequestUrl(`/api/memo?openId=${getOpenId()}`);
+  const queryString = qs.stringify({
+    openId: getOpenId(),
+    rowStatus: "NORMAL",
+  });
+
+  const url = getRequestUrl(`/api/memo?${queryString}`);
 
   return getUseFetch<ResponseData<MemoInfoResponse[]>>(url, {});
+};
+
+//
+export const archiveMemo = (memoId: number) => {
+  const url = getRequestUrl(`/api/memo/${memoId}?openId=${getOpenId()}`);
+
+  return getFetch<ResponseData<MemoInfoResponse>>({
+    url,
+    method: "PATCH",
+    data: {
+      id: memoId,
+      rowStatus: "ARCHIVED",
+    },
+  });
 };

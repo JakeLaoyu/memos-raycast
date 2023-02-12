@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { List, ActionPanel, Action, open } from "@raycast/api";
-import { getAllMemos, getRequestUrl } from "./api";
+import { List, ActionPanel, Action, Icon, confirmAlert, Alert, showToast, Toast } from "@raycast/api";
+import { archiveMemo, getAllMemos, getRequestUrl } from "./api";
 import { MemoInfoResponse } from "./types";
 
 export default function MemosListCommand(): JSX.Element {
   const [searchText, setSearchText] = useState("");
-  const { isLoading, data } = getAllMemos();
+  const { isLoading, data, revalidate } = getAllMemos();
   const [filterList, setFilterList] = useState<MemoInfoResponse[]>([]);
 
   useEffect(() => {
@@ -16,11 +16,10 @@ export default function MemosListCommand(): JSX.Element {
     setFilterList(data?.data || []);
   }, [data]);
 
-  function openItem(item: MemoInfoResponse) {
-    console.log(`${item} selected`);
+  function getItemUrl(item: MemoInfoResponse) {
     const url = getRequestUrl(`/m/${item.id}`);
 
-    open(url);
+    return url;
   }
 
   function getItemMarkdown(item: MemoInfoResponse) {
@@ -40,6 +39,35 @@ export default function MemosListCommand(): JSX.Element {
     return markdown;
   }
 
+  async function onDelete(item: MemoInfoResponse) {
+    if (
+      await confirmAlert({
+        title: "Are you sure?",
+        icon: Icon.Trash,
+        primaryAction: {
+          title: "Delete",
+          style: Alert.ActionStyle.Destructive,
+        },
+      })
+    ) {
+      showToast({
+        style: Toast.Style.Animated,
+        title: "delete...",
+      });
+      const res = await archiveMemo(item.id).catch(() => {
+        //
+      });
+
+      if (res) {
+        showToast(Toast.Style.Success, "Delete Success");
+
+        revalidate();
+      } else {
+        showToast(Toast.Style.Failure, "Delete Failed");
+      }
+    }
+  }
+
   return (
     <List
       isLoading={isLoading}
@@ -55,7 +83,13 @@ export default function MemosListCommand(): JSX.Element {
           title={item.content}
           actions={
             <ActionPanel>
-              <Action title="Open web" onAction={() => openItem(item)} />
+              <Action.OpenInBrowser url={getItemUrl(item)} />
+              <Action
+                title="Delete"
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                onAction={() => onDelete(item)}
+              />
             </ActionPanel>
           }
           detail={<List.Item.Detail markdown={getItemMarkdown(item)} />}
