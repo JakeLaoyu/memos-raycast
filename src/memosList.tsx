@@ -23,6 +23,23 @@ export default function MemosListCommand(): JSX.Element {
     open(url);
   }
 
+  function getItemMarkdown(item: MemoInfoResponse) {
+    const { content, resourceList } = item;
+    let markdown = content;
+
+    resourceList.forEach((resource, index) => {
+      const resourceUrl = getRequestUrl(`/o/r/${resource.id}/${resource.filename}`);
+
+      if (index === 0) {
+        markdown += "\n\n";
+      }
+
+      markdown += ` ![${resource.filename}](${resourceUrl})`;
+    });
+
+    return markdown;
+  }
+
   return (
     <List
       isLoading={isLoading}
@@ -30,6 +47,7 @@ export default function MemosListCommand(): JSX.Element {
       onSearchTextChange={setSearchText}
       navigationTitle="Search Memos"
       searchBarPlaceholder="Search your memo..."
+      isShowingDetail
     >
       {filterList.map((item) => (
         <List.Item
@@ -40,6 +58,7 @@ export default function MemosListCommand(): JSX.Element {
               <Action title="Open web" onAction={() => openItem(item)} />
             </ActionPanel>
           }
+          detail={<List.Item.Detail markdown={getItemMarkdown(item)} />}
         />
       ))}
     </List>
