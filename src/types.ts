@@ -42,7 +42,7 @@ interface ResourceObj {
 
 export interface MemoInfoResponse {
   id: number;
-  name: string;
+  name?: string;
   rowStatus: string;
   creatorId: number;
   createdTs: number;
